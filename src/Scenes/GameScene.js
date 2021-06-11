@@ -1,7 +1,7 @@
 import 'phaser';
 import Button from '../Objects/Button';
 
-var maxTrolleyAngleDelta = Phaser.Math.DegToRad(15);
+var maxTrolleyAngleDelta = Phaser.Math.DegToRad(10);
 
 var player;
 var heldTrolleysCount = 3;
@@ -9,6 +9,8 @@ var trolleys;
 var cursors;
 
 var speed = 0;
+var minSpeed = 0;
+var maxSpeed = 1;
 var leadRotation = 0;
 var trolleyAngleDelta = 0;
 
@@ -20,65 +22,77 @@ export default class GameScene extends Phaser.Scene {
 
     create ()
     {
-        //  A simple background for our game
+        // A simple background for our game
         this.add.image(400, 300, 'sky');
 
-        this.physics.add.container(100, 450);
+        trolleys = this.add.container(150, 150);
+        for (var i = 0; i < 10; i++) {
+            var t = this.add.sprite(0, i * 10, 'trolley');
+            trolleys.add(t);
+        }
 
-        // The player and its settings
         player = this.physics.add.sprite(100, 450, 'dude');
-
-        //  Player physics properties. Give the little guy a slight bounce.
-        player.setBounce(0.2);
-        player.setCollideWorldBounds(true);
+        trolleys.add(player);
 
         //  Input Events
         cursors = this.input.keyboard.createCursorKeys();
 
-        trolleys = this.physics.add.group({
-            key: 'trolley',
-            repeat: 11,
-            setXY: { x: 12, y: 0, stepX: 70 }
-        });
-
-        //  Checks to see if the player overlaps with any of the stars, if he does call the collectStar function
+        //  Checks to see if the player overlaps with any of the trolleys
         this.physics.add.overlap(player, trolleys, collectTrolley, null, this);
     }
 
     update ()
     {
-        // if up is held, inc speed to max
-        // if down is held dec speed to min
-        // else dec speed to min slowly.
+        // if up is held, increment speed to max
+        // if down is held decrement speed to min
+        // else decay speed to min slowly.
 
         if (cursors.up.isDown) {
-            player.setVelocityY(-160);
-        }
-        else if (cursors.down.isDown) {
-            player.setVelocityY(160);
+            speed = Math.min(maxSpeed, speed + 0.1);
+        } else if (cursors.down.isDown) {
+            speed = Math.max(minSpeed, speed - 0.1);
+        } else {
+            speed *= 0.99;
         }
 
         // @TODO: can we have the angle ripple up the chain?
 
-        // if left is held dec trolleyAngleDelta to min, then start dec rotation
-        // if right is held inc trolleyAngleDelta to max, then start inc rotation
-
         if (cursors.left.isDown) {
-            if (trolleyAngleDelta >= maxTrolleyAngleDelta) {
-                leadRotation += Phaser.Math.DegToRad(1);
-            } else {
-                trolleyAngleDelta += Phaser.Math.DegToRad(1);
+            if (trolleyAngleDelta <= maxTrolleyAngleDelta) {
+                trolleyAngleDelta += Phaser.Math.DegToRad(0.1);
             }
         }
         else if (cursors.right.isDown) {
-            if (trolleyAngleDelta <= -maxTrolleyAngleDelta) {
-                leadRotation -= Phaser.Math.DegToRad(1);
-            } else {
-                trolleyAngleDelta -= Phaser.Math.DegToRad(1);
+            if (trolleyAngleDelta >= -maxTrolleyAngleDelta) {
+                trolleyAngleDelta -= Phaser.Math.DegToRad(0.1);
             }
         }
 
-        player.setRotation(leadRotation);
+        // if moving and turning, rotate lead
+        if (speed > 0.05 && Math.abs(trolleyAngleDelta) > 0.05) {
+            if (trolleyAngleDelta > 0) {
+                leadRotation -= Phaser.Math.DegToRad(0.5);
+            } else {
+                leadRotation += Phaser.Math.DegToRad(0.5);
+            }
+        }
+
+        var tmpRotation = leadRotation;
+        var tmpX = trolleys.x;
+        var tmpY = trolleys.y;
+        var i = 0;
+        trolleys.each((t) => {
+            tmpRotation += trolleyAngleDelta;
+            tmpX -= Math.sin(leadRotation + (i * trolleyAngleDelta)) * 20;
+            tmpY += Math.cos(leadRotation + (i * trolleyAngleDelta)) * 20;
+            t.setRotation(tmpRotation);
+            t.setX(tmpX);
+            t.setY(tmpY);
+            i++;
+        });
+
+        trolleys.setX(trolleys.x + Math.sin(leadRotation + trolleyAngleDelta) * speed);
+        trolleys.setY(trolleys.y - Math.cos(leadRotation + trolleyAngleDelta) * speed);
     }
 };
 

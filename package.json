@@ -1,5 +1,5 @@
 {
-    "name": "The Trolley Problem",
+    "name": "the-trolley-problem",
     "version": "0.0.1",
     "description": "Entry for GMTK Game Jam 2021",
     "main": "src/index.js",

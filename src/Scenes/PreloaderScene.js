@@ -75,8 +75,13 @@ export default class PreloaderScene extends Phaser.Scene {
 
         // load assets needed in our game
 
-        this.load.audio('bgMusic', ['assets/sound/music/aldi-ambience.wav']);
+        this.load.audio('titleMusic', ['assets/sound/music/aldi-ambience.wav']);
+        this.load.audio('gameMusic', ['assets/sound/music/newer-wave.mp3']);
         this.load.audio('tills', ['assets/sound/fx/aldi-tills.wav']);
+        this.load.audio('crash-1', ['assets/sound/fx/crash-1.wav']);
+        this.load.audio('crash-2', ['assets/sound/fx/crash-2.wav']);
+        this.load.audio('crash-3', ['assets/sound/fx/crash-3.wav']);
+
 
         this.load.image('trolley', 'assets/img/trolley.png');
         this.load.spritesheet('player', 'assets/img/playerSprite.png', { frameWidth: 32, frameHeight: 32 });
@@ -98,7 +103,7 @@ export default class PreloaderScene extends Phaser.Scene {
         this.load.image('box', 'assets/img/box.png');
         this.load.image('checkedBox', 'assets/img/checked1.png');
         this.load.image('Logo', 'assets/img/logoBigger.png');
-        this.load.image('Background', 'assets/img/background.png')
+        this.load.image('Background', 'assets/img/background.png');
 
         // remove progress bar when complete
         this.load.on('complete', function () {

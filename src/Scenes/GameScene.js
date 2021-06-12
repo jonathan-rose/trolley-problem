@@ -105,6 +105,8 @@ export default class GameScene extends Phaser.Scene {
 
         trolleys.setX(trolleys.x + Math.sin(leadRotation + trolleyAngleDelta) * speed);
         trolleys.setY(trolleys.y - Math.cos(leadRotation + trolleyAngleDelta) * speed);
+
+        this.cameras.main.centerOn(trolleys.x + player.x, trolleys.y + player.y);
     }
 };
 

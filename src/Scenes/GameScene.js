@@ -7,18 +7,18 @@ var player;
 var trolleys;
 var cursors;
 
-var heldTrolleysCount = 0;
+var heldTrolleysCount = 1;
 var speed = 0;
-var speedDelta = 0.001;
+var speedDelta = 0.3;
 var minSpeed = 0;
-var maxSpeed = 1;
+var maxSpeed = 3;
 var leadRotation = 0;
+var rotationDelta = 2;
 var trolleyAngleDelta = 0;
+var startingLooseCount = 20;
 
 var loosetrolleys;
 var heldTrolleys;
-var trolley1;
-var trolley2;
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -46,7 +46,7 @@ export default class GameScene extends Phaser.Scene {
         heldTrolleys = this.physics.add.group();
 
         trolleys = this.add.container(300, 250);
-        for (var i = 0; i < 5; i++) {
+        for (var i = 0; i < 1; i++) {
             var t = this.add.sprite(0, i * 10, 'trolley');
             trolleys.add(t);
             heldTrolleys.add(t);
@@ -54,11 +54,10 @@ export default class GameScene extends Phaser.Scene {
         }
 
         loosetrolleys = this.physics.add.group();
-        trolley1 = this.physics.add.sprite(400, 100, 'trolley');
-        trolley2 = this.physics.add.sprite(300, 150, 'trolley');
-
-        loosetrolleys.add(trolley1);
-        loosetrolleys.add(trolley2);
+        for (var i = 0; i < startingLooseCount; i++) {
+            t = this.physics.add.sprite(Phaser.Math.RND.between(0, gameWidth), Phaser.Math.RND.between(0, gameHeight), 'trolley');
+            loosetrolleys.add(t);
+        }
 
         player = this.physics.add.sprite(0, 0, 'dude');
         trolleys.add(player);
@@ -68,19 +67,26 @@ export default class GameScene extends Phaser.Scene {
 
         //  Checks to see if the player overlaps with any of the trolleys
         this.physics.add.overlap(heldTrolleys, loosetrolleys, collectTrolley, null, this);
+
+        this.model = this.sys.game.globals.model;
+        if (this.model.musicOn === true) {
+            this.sound.stopAll();
+            this.bgMusic = this.sound.add('gameMusic', { volume: 0.5, loop: true });
+            this.bgMusic.play();
+            this.model.bgMusicPlaying = true;
+            this.sys.game.globals.bgMusic = this.bgMusic;
+        }
     }
 
     update ()
     {
-
         // if up is held, increment speed to max
         // if down is held decrement speed to min
         // else decay speed to min slowly.
-
         if (cursors.up.isDown) {
-            speed = Math.min(maxSpeed, speed + (speedDelta * heldTrolleysCount));
+            speed = Math.min(maxSpeed, speed + (speedDelta / heldTrolleysCount));
         } else if (cursors.down.isDown) {
-            speed = Math.max(minSpeed, speed - (speedDelta * heldTrolleysCount * 0.6));
+            speed = Math.max(minSpeed, speed - (speedDelta / heldTrolleysCount * 0.6));
         } else {
             speed *= 0.99;
         }
@@ -88,12 +94,12 @@ export default class GameScene extends Phaser.Scene {
         // left and right bend the trolley chain by modifying trolleyAngleDelta
         if (cursors.left.isDown) {
             if (trolleyAngleDelta <= maxTrolleyAngleDelta) {
-                trolleyAngleDelta += Phaser.Math.DegToRad(0.1);
+                trolleyAngleDelta += Phaser.Math.DegToRad(rotationDelta / (heldTrolleysCount * 2));
             }
         }
         else if (cursors.right.isDown) {
             if (trolleyAngleDelta >= -maxTrolleyAngleDelta) {
-                trolleyAngleDelta -= Phaser.Math.DegToRad(0.1);
+                trolleyAngleDelta -= Phaser.Math.DegToRad(rotationDelta / (heldTrolleysCount * 2));
             }
         }
 
@@ -139,4 +145,7 @@ function collectTrolley (player, trolley)
     // Add new trolley to the collection
     trolleys.add(trolley);
     trolleys.sendToBack(trolley);
+
+    // play sound effect
+    this.sound.play(Phaser.Math.RND.pick(['crash-1', 'crash-2', 'crash-3']), { volume: 0.5 });
 }

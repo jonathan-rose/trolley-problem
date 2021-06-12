@@ -3,11 +3,18 @@ import Button from '../Objects/Button';
 
 var maxTrolleyAngleDelta = Phaser.Math.DegToRad(10);
 
+var cursors;
+
 var player;
 var trolleys;
 var frontTrolleyCollider;
 var sideTrolleyCollider;
-var cursors;
+var loosetrolleys;
+var heldTrolleys;
+
+var timeText;
+var startingTime = 20;
+var remainingTime = startingTime;
 
 var heldTrolleysCount = 1;
 var speed = 0;
@@ -19,9 +26,6 @@ var rotationDelta = 2;
 var trolleyAngleDelta = 0;
 var startingLooseCount = 20;
 
-var loosetrolleys;
-var heldTrolleys;
-
 var redCar;
 
 export default class GameScene extends Phaser.Scene {
@@ -29,8 +33,9 @@ export default class GameScene extends Phaser.Scene {
         super('Game');
     }
 
-    create ()
-    {
+    create () {
+        var config = this.game.config;
+
         // Create references to the width and height of the viewport in browser
         var gameWidth = game.config.width;
         var gameHeight = game.config.height;
@@ -98,10 +103,40 @@ export default class GameScene extends Phaser.Scene {
             this.model.bgMusicPlaying = true;
             this.sys.game.globals.bgMusic = this.bgMusic;
         }
+
+        // Display remaining time
+        timeText = this.add.text(
+            config.width * 0.5,
+            config.height * 0.11,
+            remainingTime,
+            {align: 'center',
+             fontSize: '48px',
+             fill: '#FFF',
+             backgroundColor: 'rgba(0,0,0,0.5)'}
+        );
+        timeText.setScrollFactor(0);
+
+        // Decay the timer 50 times a second (looks fast, but uses fewer callbacks)
+        this.time.addEvent({
+            delay: 20,
+            callback: () => {
+                remainingTime = Math.max(0, remainingTime - 0.02);
+                timeText.setText(remainingTime.toFixed(2));
+            },
+            loop: true
+        });
+
+        // Turn the timer red when you're low on time.
+        this.time.addEvent({
+            delay: (startingTime * 1000 * 0.5), // roughly half starting time in seconds
+            callback: () => {
+                timeText.setColor('#FF0000');
+            }
+        });
     }
 
-    update ()
-    {
+    update () {
+
         // if up is held, increment speed to max
         // if down is held decrement speed to min
         // else decay speed to min slowly.
@@ -136,6 +171,7 @@ export default class GameScene extends Phaser.Scene {
             player.anims.play('walk', true);
         }
 
+        // Draw the trolleys and player based on the trolleys container position, rotation and trolleyAngleDelta
         var tmpRotation = leadRotation;
         var tmpX = 0;
         var tmpY = 0;
@@ -164,8 +200,7 @@ export default class GameScene extends Phaser.Scene {
     }
 };
 
-function collectTrolley (player, trolley)
-{
+function collectTrolley (player, trolley) {
     heldTrolleysCount++;
 
     // Add and remove trolley from groups which handle collisions

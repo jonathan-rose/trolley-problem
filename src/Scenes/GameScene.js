@@ -27,8 +27,21 @@ export default class GameScene extends Phaser.Scene {
 
     create ()
     {
+        // Create references to the width and height of the viewport in browser
+        var gameWidth = game.config.width;
+        var gameHeight = game.config.height;
+
+        // Set the boundaries of the gameworld
+        // worldScaleFactor * dimensions of the browser viewport
+        var worldScaleFactor = 2;
+        var gameWorld = this.physics.world;
+        gameWorld.setBounds(0, 0, gameWidth * worldScaleFactor, gameWidth * worldScaleFactor);
+
         // A simple background for our game
-        this.add.image(400, 300, 'sky');
+        // Uses tileSprite for future change to tile if wanted
+        var background  = this.add.tileSprite(0, 0, gameWorld.bounds.width, gameWorld.bounds.height, 'sky');
+        background.setTileScale(1, 1);
+        background.setOrigin(0, 0);
 
         heldTrolleys = this.physics.add.group();
 

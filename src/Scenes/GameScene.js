@@ -4,11 +4,12 @@ import Button from '../Objects/Button';
 var maxTrolleyAngleDelta = Phaser.Math.DegToRad(10);
 
 var player;
-var heldTrolleysCount = 3;
 var trolleys;
 var cursors;
 
+var heldTrolleysCount = 0;
 var speed = 0;
+var speedDelta = 0.001;
 var minSpeed = 0;
 var maxSpeed = 1;
 var leadRotation = 0;
@@ -29,6 +30,7 @@ export default class GameScene extends Phaser.Scene {
         for (var i = 0; i < 10; i++) {
             var t = this.add.sprite(0, i * 10, 'trolley');
             trolleys.add(t);
+            heldTrolleysCount++;
         }
 
         player = this.physics.add.sprite(100, 450, 'dude');
@@ -48,15 +50,16 @@ export default class GameScene extends Phaser.Scene {
         // else decay speed to min slowly.
 
         if (cursors.up.isDown) {
-            speed = Math.min(maxSpeed, speed + 0.1);
+            speed = Math.min(maxSpeed, speed + (speedDelta * heldTrolleysCount));
         } else if (cursors.down.isDown) {
-            speed = Math.max(minSpeed, speed - 0.1);
+            speed = Math.max(minSpeed, speed - (speedDelta * heldTrolleysCount * 0.6));
         } else {
             speed *= 0.99;
         }
 
         // @TODO: can we have the angle ripple up the chain?
 
+        // left and right bend the trolley chain by modifying trolleyAngleDelta
         if (cursors.left.isDown) {
             if (trolleyAngleDelta <= maxTrolleyAngleDelta) {
                 trolleyAngleDelta += Phaser.Math.DegToRad(0.1);
@@ -69,12 +72,8 @@ export default class GameScene extends Phaser.Scene {
         }
 
         // if moving and turning, rotate lead
-        if (speed > 0.05 && Math.abs(trolleyAngleDelta) > 0.05) {
-            if (trolleyAngleDelta > 0) {
-                leadRotation -= Phaser.Math.DegToRad(0.5);
-            } else {
-                leadRotation += Phaser.Math.DegToRad(0.5);
-            }
+        if (speed > 0 && Math.abs(trolleyAngleDelta) > 0) {
+            leadRotation -= (speed * trolleyAngleDelta * 0.1);
         }
 
         var tmpRotation = leadRotation;

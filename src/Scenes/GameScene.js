@@ -19,6 +19,7 @@ var loosetrolleys;
 var heldTrolleys;
 var trolley1;
 var trolley2;
+var redCar;
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -55,12 +56,24 @@ export default class GameScene extends Phaser.Scene {
 
         loosetrolleys = this.physics.add.group();
         trolley1 = this.physics.add.sprite(400, 100, 'trolley');
-        trolley2 = this.physics.add.sprite(300, 150, 'trolley');
+        trolley2 = this.physics.add.sprite(300, 450, 'trolley');
+
+        redCar = this.physics.add.sprite(300, 150, 'redCar');
+        redCar = this.physics.add.sprite(400, 150, 'orangeCar');
+        redCar = this.physics.add.sprite(200, 150, 'blueCar');
+        redCar = this.physics.add.sprite(500, 150, 'greenCar');
+        redCar = this.physics.add.sprite(600, 150, 'blackCar');
 
         loosetrolleys.add(trolley1);
         loosetrolleys.add(trolley2);
 
-        player = this.physics.add.sprite(0, 0, 'dude');
+        player = this.physics.add.sprite(0, 0, 'player');
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 1 }),
+            frameRate: 4,
+            repeat: -1
+        });
         trolleys.add(player);
 
         //  Input Events
@@ -100,6 +113,11 @@ export default class GameScene extends Phaser.Scene {
         // if moving and turning, rotate lead
         if (speed > 0 && Math.abs(trolleyAngleDelta) > 0) {
             leadRotation -= (speed * trolleyAngleDelta * 0.1);
+        }
+
+        if (speed > 0)
+        {
+            player.anims.play('walk', true);
         }
 
         var tmpRotation = leadRotation;

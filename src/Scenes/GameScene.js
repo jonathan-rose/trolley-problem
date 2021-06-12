@@ -39,7 +39,7 @@ export default class GameScene extends Phaser.Scene {
 
         // A simple background for our game
         // Uses tileSprite for future change to tile if wanted
-        var background  = this.add.tileSprite(0, 0, gameWorld.bounds.width, gameWorld.bounds.height, 'sky');
+        var background  = this.add.tileSprite(0, 0, gameWorld.bounds.width, gameWorld.bounds.height, 'background');
         background.setTileScale(1, 1);
         background.setOrigin(0, 0);
 

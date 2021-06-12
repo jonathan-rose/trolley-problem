@@ -5,6 +5,8 @@ var maxTrolleyAngleDelta = Phaser.Math.DegToRad(10);
 
 var player;
 var trolleys;
+var frontTrolleyCollider;
+var sideTrolleyCollider;
 var cursors;
 
 var heldTrolleysCount = 1;
@@ -58,6 +60,8 @@ export default class GameScene extends Phaser.Scene {
         loosetrolleys = this.physics.add.group();
         for (var i = 0; i < startingLooseCount; i++) {
             t = this.physics.add.sprite(Phaser.Math.RND.between(0, gameWidth), Phaser.Math.RND.between(0, gameHeight), 'trolley');
+            t.setRotation(Phaser.Math.RND.rotation());
+            t.setCollideWorldBounds(true);
             loosetrolleys.add(t);
         }
 
@@ -66,7 +70,6 @@ export default class GameScene extends Phaser.Scene {
         redCar = this.physics.add.sprite(200, 150, 'blueCar');
         redCar = this.physics.add.sprite(500, 150, 'greenCar');
         redCar = this.physics.add.sprite(600, 150, 'blackCar');
-
 
         player = this.physics.add.sprite(0, 0, 'player');
         this.anims.create({
@@ -77,11 +80,16 @@ export default class GameScene extends Phaser.Scene {
         });
         trolleys.add(player);
 
-        //  Input Events
+        // Input Events
         cursors = this.input.keyboard.createCursorKeys();
 
-        //  Checks to see if the player overlaps with any of the trolleys
-        this.physics.add.overlap(heldTrolleys, loosetrolleys, collectTrolley, null, this);
+        // Checks to see if the front held trolley overlaps with any of the trolleys
+        frontTrolleyCollider = this.physics.add.overlap(trolleys.first, loosetrolleys, collectTrolley, null, this);
+
+        // Check to see if non-front held trolleys collide with loose trolleys
+        sideTrolleyCollider = this.physics.add.collider(heldTrolleys, loosetrolleys, knockTrolley, null, this);
+
+        // Play the game music
         this.model = this.sys.game.globals.model;
         if (this.model.musicOn === true) {
             this.sound.stopAll();
@@ -94,7 +102,6 @@ export default class GameScene extends Phaser.Scene {
 
     update ()
     {
-
         // if up is held, increment speed to max
         // if down is held decrement speed to min
         // else decay speed to min slowly.
@@ -146,6 +153,13 @@ export default class GameScene extends Phaser.Scene {
         trolleys.setX(trolleys.x + Math.sin(leadRotation + trolleyAngleDelta) * speed);
         trolleys.setY(trolleys.y - Math.cos(leadRotation + trolleyAngleDelta) * speed);
 
+        // slow down moving loose trolleys
+        loosetrolleys.children.each((t) => {
+            t.body.setVelocityX(0.98 * t.body.velocity.x);
+            t.body.setVelocityY(0.98 * t.body.velocity.y);
+            t.body.setAngularVelocity(0.98 * t.body.angularVelocity);
+        });
+
         this.cameras.main.centerOn(trolleys.x + player.x, trolleys.y + player.y);
     }
 };
@@ -166,6 +180,35 @@ function collectTrolley (player, trolley)
     // Add new trolley to the collection
     trolleys.add(trolley);
     trolleys.sendToBack(trolley);
+
+    // reset the front and side trolley colliders
+    frontTrolleyCollider.destroy();
+    frontTrolleyCollider = this.physics.add.overlap(trolleys.first, loosetrolleys, collectTrolley, null, this);
+    sideTrolleyCollider.destroy();
+    sideTrolleyCollider = this.physics.add.collider(heldTrolleys, loosetrolleys, knockTrolley, null, this);
+
     // play sound effect
     this.sound.play(Phaser.Math.RND.pick(['crash-1', 'crash-2', 'crash-3']), { volume: 0.5 });
+}
+
+/**
+ * Knock trolleys out of the way of the trolley chain if they hit the sides.
+ */
+function knockTrolley(heldTrolley, looseTrolley) {
+    // Clone the position vectors so we don't actually modify them
+    var heldPos = heldTrolley.body.position.clone();
+    var loosePos = looseTrolley.body.position.clone();
+
+    // Calculate the vector between the two trolleys
+    var diff = loosePos.subtract(heldPos);
+
+    // Normalise it to get a directed unit vector
+    var unit = diff.normalize();
+
+    // Update the velocity of the loose trolley based on the unit vector direction
+    if (heldTrolley != trolleys.first) {
+        looseTrolley.body.setVelocityX(unit.x * 200);
+        looseTrolley.body.setVelocityY(unit.y * 200);
+        looseTrolley.body.setAngularVelocity(Phaser.Math.RND.sign() * Phaser.Math.RND.between(75, 125));
+    }
 }

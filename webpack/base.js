@@ -25,6 +25,11 @@ module.exports = {
       }
     ]
   },
+  devServer: {
+    watchOptions: {
+      ignored: '**/.#*'
+    }
+  },
   plugins: [
     new CleanWebpackPlugin(["dist"], {
       root: path.resolve(__dirname, "../")

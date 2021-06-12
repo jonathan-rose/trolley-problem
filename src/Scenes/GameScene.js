@@ -1,4 +1,5 @@
 import 'phaser';
+import { Clock } from 'phaser/src/time';
 import Button from '../Objects/Button';
 
 var maxTrolleyAngleDelta = Phaser.Math.DegToRad(10);
@@ -6,6 +7,7 @@ var maxTrolleyAngleDelta = Phaser.Math.DegToRad(10);
 var player;
 var trolleys;
 var cursors;
+var trolleyHouse;
 
 var heldTrolleysCount = 1;
 var speed = 0;
@@ -19,8 +21,14 @@ var startingLooseCount = 20;
 
 var loosetrolleys;
 var heldTrolleys;
+var inHouse = false;
+
+var nextTrolley;
 
 var redCar;
+
+var frame_count = 0;
+
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -67,6 +75,12 @@ export default class GameScene extends Phaser.Scene {
         redCar = this.physics.add.sprite(500, 150, 'greenCar');
         redCar = this.physics.add.sprite(600, 150, 'blackCar');
 
+        // 64 is hard coded value of half the width of trolleyHouse sprite to save time
+        var trolleyHouseX = (gameWorld.bounds.width / 2) - 64
+        trolleyHouse = this.physics.add.sprite(trolleyHouseX, 100, 'House');
+
+        // Add collider between firstmost trolley and trollyHouse
+        this.physics.add.overlap(heldTrolleys, trolleyHouse, scoreTrolley, null, this);
 
         player = this.physics.add.sprite(0, 0, 'player');
         this.anims.create({
@@ -90,10 +104,12 @@ export default class GameScene extends Phaser.Scene {
             this.model.bgMusicPlaying = true;
             this.sys.game.globals.bgMusic = this.bgMusic;
         }
+        
     }
 
     update ()
     {
+        // console.log(trolleys.length);
 
         // if up is held, increment speed to max
         // if down is held decrement speed to min
@@ -168,4 +184,55 @@ function collectTrolley (player, trolley)
     trolleys.sendToBack(trolley);
     // play sound effect
     this.sound.play(Phaser.Math.RND.pick(['crash-1', 'crash-2', 'crash-3']), { volume: 0.5 });
+}
+
+function scoreTrolley ()
+{
+    // console.log(trolleys.length);
+
+    // -1 on trolley.length to account for player entity
+    for (var i = (trolleys.length - 1); i > 1; i--) {
+        console.log(i);
+        trolleys.remove(trolleys.first);
+        heldTrolleysCount--;
+    }
+
+    // if(((frame_count % 600) == 0) && trolleys.children.length > 0){
+    //     trolleys.remove(trolleys.first);
+    //     heldTrolleysCount--;
+    // }
+
+    // // var timer = this.add.TimerEvent;
+    // if (heldTrolleysCount > 1) {
+    //     this.time.delayedCall(1000, trolleys.remove(trolleys.first));
+    // heldTrolleysCount--;
+    // }
+
+    // if (heldTrolleysCount > 1) {
+    //     trolleys.remove(trolleys.first);
+    // }
+    
+
+    // timer = this.time.addEvent({ delay: 500, timeScale: 1});
+
+    // var timeNow = game.time;
+
+    // if (heldTrolleysCount > 0 && nextTrolley == (timeNow + 500)) {
+    //     trolleys.remove(trolleys.first);
+    // }
+    // else
+    // {
+    //     nextTrolley = game.time; 
+    // };
+
+        // heldTrolleysCount--;
+        // trolleys.remove(player);
+        // heldTrolleys.remove(trolley);
+        // heldTrolleys.remove(heldTrolleys.children[0], true);
+        // heldTrolleys.remove(t);
+        // heldTrolleys.destroy();
+    
+    console.log(heldTrolleysCount);
+    // heldTrolleys.remove(trolley);
+    
 }

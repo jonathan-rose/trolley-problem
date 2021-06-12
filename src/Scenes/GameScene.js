@@ -15,6 +15,10 @@ var maxSpeed = 1;
 var leadRotation = 0;
 var trolleyAngleDelta = 0;
 
+var loosetrolleys;
+var heldTrolleys;
+var trolley1;
+var trolley2;
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -26,25 +30,36 @@ export default class GameScene extends Phaser.Scene {
         // A simple background for our game
         this.add.image(400, 300, 'sky');
 
-        trolleys = this.add.container(150, 150);
-        for (var i = 0; i < 10; i++) {
+        heldTrolleys = this.physics.add.group();
+
+        trolleys = this.add.container(300, 250);
+        for (var i = 0; i < 5; i++) {
             var t = this.add.sprite(0, i * 10, 'trolley');
             trolleys.add(t);
+            heldTrolleys.add(t);
             heldTrolleysCount++;
         }
 
-        player = this.physics.add.sprite(100, 450, 'dude');
+        loosetrolleys = this.physics.add.group();
+        trolley1 = this.physics.add.sprite(400, 100, 'trolley');
+        trolley2 = this.physics.add.sprite(300, 150, 'trolley');
+
+        loosetrolleys.add(trolley1);
+        loosetrolleys.add(trolley2);
+
+        player = this.physics.add.sprite(0, 0, 'dude');
         trolleys.add(player);
 
         //  Input Events
         cursors = this.input.keyboard.createCursorKeys();
 
         //  Checks to see if the player overlaps with any of the trolleys
-        this.physics.add.overlap(player, trolleys, collectTrolley, null, this);
+        this.physics.add.overlap(heldTrolleys, loosetrolleys, collectTrolley, null, this);
     }
 
     update ()
     {
+
         // if up is held, increment speed to max
         // if down is held decrement speed to min
         // else decay speed to min slowly.
@@ -56,8 +71,6 @@ export default class GameScene extends Phaser.Scene {
         } else {
             speed *= 0.99;
         }
-
-        // @TODO: can we have the angle ripple up the chain?
 
         // left and right bend the trolley chain by modifying trolleyAngleDelta
         if (cursors.left.isDown) {
@@ -77,16 +90,16 @@ export default class GameScene extends Phaser.Scene {
         }
 
         var tmpRotation = leadRotation;
-        var tmpX = trolleys.x;
-        var tmpY = trolleys.y;
+        var tmpX = 0;
+        var tmpY = 0;
         var i = 0;
         trolleys.each((t) => {
-            tmpRotation += trolleyAngleDelta;
-            tmpX -= Math.sin(leadRotation + (i * trolleyAngleDelta)) * 20;
-            tmpY += Math.cos(leadRotation + (i * trolleyAngleDelta)) * 20;
             t.setRotation(tmpRotation);
             t.setX(tmpX);
             t.setY(tmpY);
+            tmpRotation += trolleyAngleDelta;
+            tmpX -= Math.sin(leadRotation + (i * trolleyAngleDelta)) * 20;
+            tmpY += Math.cos(leadRotation + (i * trolleyAngleDelta)) * 20;
             i++;
         });
 
@@ -97,17 +110,18 @@ export default class GameScene extends Phaser.Scene {
 
 function collectTrolley (player, trolley)
 {
-    trolley.disableBody(true, true);
-
     heldTrolleysCount++;
 
-    if (trolleys.countActive(true) === 0)
-    {
-        //  A new batch of trolleys to collect
-        trolleys.children.iterate(function (child) {
-            child.enableBody(true, child.x, 0, true, true);
-        });
+    // Add and remove trolley from groups which handle collisions
+    loosetrolleys.remove(trolley);
+    heldTrolleys.add(trolley);
 
-        var x = (player.x < 400) ? Phaser.Math.Between(400, 800) : Phaser.Math.Between(0, 400);
-    }
+    // Set new position of trolleys
+    trolleys.setX(trolleys.x + (Math.sin((leadRotation - trolleyAngleDelta)) * 20));
+    trolleys.setY(trolleys.y - (Math.cos((leadRotation - trolleyAngleDelta)) * 20));
+    leadRotation -= trolleyAngleDelta;
+
+    // Add new trolley to the collection
+    trolleys.add(trolley);
+    trolleys.sendToBack(trolley);
 }

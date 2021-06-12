@@ -75,30 +75,25 @@ export default class PreloaderScene extends Phaser.Scene {
 
         // load assets needed in our game
 
-        this.load.audio('bgMusic', ['assets/Komiku_-_07_-_Run_against_the_universe.mp3']);
+        this.load.audio('bgMusic', ['assets/sound/music/aldi-ambience.wav']);
+        this.load.audio('tills', ['assets/sound/fx/aldi-tills.wav']);
 
-        this.load.image('trolley', 'assets/trolley.png');
-
-
-
+        this.load.image('trolley', 'assets/img/trolley.png');
 
 
 
-        this.load.image('sky', 'assets/sky.png');
-        this.load.image('ground', 'assets/platform.png');
-        this.load.image('star', 'assets/star.png');
-        this.load.image('bomb', 'assets/bomb.png');
-        this.load.spritesheet('dude', 'assets/dude.png', { frameWidth: 32, frameHeight: 48 });
 
-        this.load.image('menuBG', 'assets/sky.png');
-        this.load.image('aboutBG', 'assets/sky.png');
-        this.load.image('deathScene', 'assets/deathScene.png');
-
-        this.load.image('Button', 'assets/button1.png');
-        this.load.image('ButtonPressed', 'assets/button1selected.png');
-        this.load.image('box', 'assets/box.png');
-        this.load.image('checkedBox', 'assets/checked1.png');
-        this.load.image('Logo', 'assets/logoBigger.png');
+        // TEMP assets
+        this.load.image('sky', 'assets/img/sky.png');
+        this.load.spritesheet('dude', 'assets/img/dude.png', { frameWidth: 32, frameHeight: 48 });
+        this.load.image('menuBG', 'assets/img/sky.png');
+        this.load.image('aboutBG', 'assets/img/sky.png');
+        this.load.image('deathScene', 'assets/img/deathScene.png');
+        this.load.image('Button', 'assets/img/button1.png');
+        this.load.image('ButtonPressed', 'assets/img/button1selected.png');
+        this.load.image('box', 'assets/img/box.png');
+        this.load.image('checkedBox', 'assets/img/checked1.png');
+        this.load.image('Logo', 'assets/img/logoBigger.png');
 
         // remove progress bar when complete
         this.load.on('complete', function () {
@@ -122,9 +117,5 @@ export default class PreloaderScene extends Phaser.Scene {
 
     ready () {
         this.scene.start('Title');
-        // this.readyCount++;
-        // if (this.readyCount === 20) {
-        //     this.scene.start('Credits');
-        // }
     }
 };

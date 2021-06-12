@@ -20,6 +20,8 @@ var startingLooseCount = 20;
 var loosetrolleys;
 var heldTrolleys;
 
+var redCar;
+
 export default class GameScene extends Phaser.Scene {
     constructor () {
         super('Game');
@@ -59,7 +61,20 @@ export default class GameScene extends Phaser.Scene {
             loosetrolleys.add(t);
         }
 
-        player = this.physics.add.sprite(0, 0, 'dude');
+        redCar = this.physics.add.sprite(300, 150, 'redCar');
+        redCar = this.physics.add.sprite(400, 150, 'orangeCar');
+        redCar = this.physics.add.sprite(200, 150, 'blueCar');
+        redCar = this.physics.add.sprite(500, 150, 'greenCar');
+        redCar = this.physics.add.sprite(600, 150, 'blackCar');
+
+
+        player = this.physics.add.sprite(0, 0, 'player');
+        this.anims.create({
+            key: 'walk',
+            frames: this.anims.generateFrameNumbers('player', { start: 0, end: 1 }),
+            frameRate: 4,
+            repeat: -1
+        });
         trolleys.add(player);
 
         //  Input Events
@@ -67,7 +82,6 @@ export default class GameScene extends Phaser.Scene {
 
         //  Checks to see if the player overlaps with any of the trolleys
         this.physics.add.overlap(heldTrolleys, loosetrolleys, collectTrolley, null, this);
-
         this.model = this.sys.game.globals.model;
         if (this.model.musicOn === true) {
             this.sound.stopAll();
@@ -80,9 +94,11 @@ export default class GameScene extends Phaser.Scene {
 
     update ()
     {
+
         // if up is held, increment speed to max
         // if down is held decrement speed to min
         // else decay speed to min slowly.
+
         if (cursors.up.isDown) {
             speed = Math.min(maxSpeed, speed + (speedDelta / heldTrolleysCount));
         } else if (cursors.down.isDown) {
@@ -106,6 +122,11 @@ export default class GameScene extends Phaser.Scene {
         // if moving and turning, rotate lead
         if (speed > 0 && Math.abs(trolleyAngleDelta) > 0) {
             leadRotation -= (speed * trolleyAngleDelta * 0.1);
+        }
+
+        if (speed > 0)
+        {
+            player.anims.play('walk', true);
         }
 
         var tmpRotation = leadRotation;
@@ -145,7 +166,6 @@ function collectTrolley (player, trolley)
     // Add new trolley to the collection
     trolleys.add(trolley);
     trolleys.sendToBack(trolley);
-
     // play sound effect
     this.sound.play(Phaser.Math.RND.pick(['crash-1', 'crash-2', 'crash-3']), { volume: 0.5 });
 }

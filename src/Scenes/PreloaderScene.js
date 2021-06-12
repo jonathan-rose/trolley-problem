@@ -84,8 +84,12 @@ export default class PreloaderScene extends Phaser.Scene {
 
 
         this.load.image('trolley', 'assets/img/trolley.png');
-
-
+        this.load.spritesheet('player', 'assets/img/playerSprite.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.image('redCar', 'assets/img/carRed.png');
+        this.load.image('greenCar', 'assets/img/carGreen.png');
+        this.load.image('blueCar', 'assets/img/carBlue.png');
+        this.load.image('orangeCar', 'assets/img/carOrange.png');
+        this.load.image('blackCar', 'assets/img/carBlack.png');
 
 
         // TEMP assets

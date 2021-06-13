@@ -44,6 +44,10 @@ var loosetrolleys;
 var heldTrolleys;
 
 var coin;
+var tempScore = 0;
+var totalScore = 0;
+var scoreMultiplier = 1.5;
+var scoreTimer;
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -333,6 +337,22 @@ function scoreTrolley (trolleyHouse, trolley)
             x: coin.x + (Phaser.Math.RND.sign()*Phaser.Math.RND.between(30, 50)),
             duration: 1000
         });
+
+        tempScore++;
+
+        console.log(tempScore);
+
+        totalScore = tempScore * (tempScore * scoreMultiplier);
+
+        console.log(totalScore);
+
+        this.time.addEvent({delay: 1500, callback: resetMultiplier, callbackScope: this, loop: true})
+
+        function resetMultiplier ()
+        {
+            tempScore = 0;
+        }
+
     }
 
     // reset the front and side trolley colliders

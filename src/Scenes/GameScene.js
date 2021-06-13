@@ -9,6 +9,8 @@ var cursors;
 var player;
 var trolleys;
 var trolleyHouse;
+var trolleyHouseX;
+var trolleyHouseY;
 
 var frontTrolleyCollider;
 var sideTrolleyCollider;
@@ -32,6 +34,7 @@ var startingLooseCount = 20;
 var loosetrolleys;
 var heldTrolleys;
 var redCar;
+var coin;
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -51,10 +54,8 @@ export default class GameScene extends Phaser.Scene {
         var gameWorld = this.physics.world;
         gameWorld.setBounds(0, 0, gameWidth * worldScaleFactor, gameWidth * worldScaleFactor);
 
-        // A simple background for our game
-        // Uses tileSprite for future change to tile if wanted
-        var background  = this.add.tileSprite(0, 0, gameWorld.bounds.width, gameWorld.bounds.height, 'Background');
-        background.setTileScale(1, 1);
+
+        var background = this.add.image(0, 0, 'carPark');
         background.setOrigin(0, 0);
 
         heldTrolleys = this.physics.add.group();
@@ -83,8 +84,9 @@ export default class GameScene extends Phaser.Scene {
 
         // Position of trolley house
         // 64 is hard coded value of half the width of trolleyHouse sprite to save time
-        var trolleyHouseX = (gameWorld.bounds.width / 2) - 64
-        trolleyHouse = this.physics.add.sprite(trolleyHouseX, 100, 'House');
+        trolleyHouseX = (gameWorld.bounds.width / 2) - 64;
+        trolleyHouseY = 100;
+        trolleyHouse = this.physics.add.sprite(trolleyHouseX, trolleyHouseY, 'House');
 
         // Add collider between firstmost trolley and trollyHouse
         this.physics.add.overlap(heldTrolleys, trolleyHouse, scoreTrolley, null, this);
@@ -97,6 +99,13 @@ export default class GameScene extends Phaser.Scene {
             repeat: -1
         });
         trolleys.add(player);
+
+        this.anims.create({
+            key: 'spin',
+            frames: this.anims.generateFrameNumbers('coin', { start: 0, end: 5 }),
+            frameRate: 10,
+            repeat: -1
+        });
 
         // Input Events
         cursors = this.input.keyboard.createCursorKeys();
@@ -238,7 +247,11 @@ function collectTrolley (player, trolley) {
     sideTrolleyCollider = this.physics.add.collider(heldTrolleys, loosetrolleys, knockTrolley, null, this);
 
     // play sound effect
-    this.sound.play(Phaser.Math.RND.pick(['crash-1', 'crash-2', 'crash-3']), { volume: 0.5 });
+    this.model = this.sys.game.globals.model;
+    if (this.model.soundOn === true)
+    {
+        this.sound.play(Phaser.Math.RND.pick(['crash-1', 'crash-2', 'crash-3']), { volume: 0.5 });
+    }
 }
 
 function scoreTrolley (trolleyHouse, trolley)
@@ -250,6 +263,37 @@ function scoreTrolley (trolleyHouse, trolley)
 
         trolleys.setX(trolleys.x - Math.sin(leadRotation - trolleyAngleDelta) * 20);
         trolleys.setY(trolleys.y + Math.cos(leadRotation - trolleyAngleDelta) * 20);
+
+         //coin sprite
+        coin = this.physics.add.sprite(trolleyHouseX, trolleyHouseY, 'coin');
+        coin.anims.play('spin', true);
+
+        this.model = this.sys.game.globals.model;
+        if (this.model.soundOn === true)
+        {
+            this.sound.play('coinSound');
+        }
+
+        this.tweens.add({
+            targets: coin,
+            y: coin.y - 50,
+            yoyo: true,
+            duration: 500,
+            ease: "Sine.easeOut", 
+            callbackScope: this,
+            onComplete: function(tween, c){
+                this.time.addEvent({
+                    delay: 500,
+                    callback: () => {c[0].destroy();}
+                });
+            }
+        });
+
+        this.tweens.add({
+            targets: coin,
+            x: coin.x + (Phaser.Math.RND.sign()*Phaser.Math.RND.between(30, 50)),
+            duration: 1000
+        });
     }
 
     // reset the front and side trolley colliders
@@ -258,6 +302,19 @@ function scoreTrolley (trolleyHouse, trolley)
     sideTrolleyCollider.destroy();
     sideTrolleyCollider = this.physics.add.collider(heldTrolleys, loosetrolleys, knockTrolley, null, this);
 
+   
+    
+
+    // this.tweens.add({
+    //     targets: coin,
+    //     x: trolleyHouseX+200,
+    //     y: trolleyHouseY+200,
+    //     duration: 1000,
+    //     ease: 'Power2'
+    //     //repeat: 3,
+    //     //delay: 1000
+    // });
+    
 }
 
 /**
@@ -281,3 +338,8 @@ function knockTrolley(heldTrolley, looseTrolley) {
         looseTrolley.body.setAngularVelocity(Phaser.Math.RND.sign() * Phaser.Math.RND.between(75, 125));
     }
 }
+
+// function coinAnimation(trolleyHouse)
+// {
+
+// }

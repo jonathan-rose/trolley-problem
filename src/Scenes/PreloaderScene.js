@@ -76,7 +76,7 @@ export default class PreloaderScene extends Phaser.Scene {
         // load assets needed in our game
 
         this.load.audio('titleMusic', ['assets/sound/music/aldi-ambience.wav']);
-        this.load.audio('gameMusic', ['assets/sound/music/newer-wave.mp3']);
+        this.load.audio('gameMusic', ['assets/sound/music/newer-wave.wav']);
         this.load.audio('tills', ['assets/sound/fx/aldi-tills.wav']);
         this.load.audio('crash-1', ['assets/sound/fx/crash-1.wav']);
         this.load.audio('crash-2', ['assets/sound/fx/crash-2.wav']);

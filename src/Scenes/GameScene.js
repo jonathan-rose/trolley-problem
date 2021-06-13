@@ -23,6 +23,8 @@ var frontTrolleyCollider;
 var sideTrolleyCollider;
 var loosetrolleys;
 var heldTrolleys;
+var trolleyIndicators;
+var trolleyHouseIndicator;
 var trolleysVelocityX = 0;
 var trolleysVelocityY = 0;
 
@@ -39,12 +41,6 @@ var leadRotation = 0;
 var rotationDelta = 2;
 var trolleyAngleDelta = 0;
 var startingLooseCount = 50;
-
-var coin;
-var tempScore = 0;
-var totalScore = 0;
-var scoreMultiplier = 1.5;
-var scoreTimer;
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -78,21 +74,25 @@ export default class GameScene extends Phaser.Scene {
         }
 
         loosetrolleys = this.physics.add.group();
+        trolleyIndicators = this.physics.add.group();
         for (var i = 0; i < startingLooseCount; i++) {
-            t = this.physics.add.sprite(
-                Phaser.Math.RND.between(0, gameWidth * worldScaleFactor),
-                Phaser.Math.RND.between(0, gameHeight * worldScaleFactor),
-                'trolley'
-            );
+            t = this.physics.add.sprite(Phaser.Math.RND.between(0, gameWidth), Phaser.Math.RND.between(0, gameHeight), 'trolley');
             t.setRotation(Phaser.Math.RND.rotation());
             t.setCollideWorldBounds(true);
+
+            var ti = this.physics.add.sprite(t.x, t.y, 'coin');
+            ti.setVisible(false);
+            trolleyIndicators.add(ti);
+
+            t.indicator = ti;
+
             loosetrolleys.add(t);
         }
 
-        upBoundary = this.add.rectangle(0, -100, gameWidth * worldScaleFactor, 100);
-        downBoundary = this.add.rectangle(0, gameHeight * worldScaleFactor, gameWidth * worldScaleFactor, 100);
-        leftBoundary = this.add.rectangle(-100, 0, 100, gameHeight * worldScaleFactor);
-        rightBoundary = this.add.rectangle(gameWidth * worldScaleFactor, 0, 100, gameHeight * worldScaleFactor);
+        upBoundary = this.add.rectangle(0, -100, gameWorld.bounds.width, 100);
+        downBoundary = this.add.rectangle(0, gameWorld.bounds.height, gameWorld.bounds.width, 100);
+        leftBoundary = this.add.rectangle(-100, 0, 100, gameWorld.bounds.height);
+        rightBoundary = this.add.rectangle(gameWorld.bounds.width, 0, 100, gameWorld.bounds.height);
 
         upBoundary.setOrigin(0, 0);
         downBoundary.setOrigin(0, 0);
@@ -266,8 +266,37 @@ export default class GameScene extends Phaser.Scene {
         });
 
         this.cameras.main.centerOn(trolleys.x + player.x, trolleys.y + player.y);
+
+        drawIndicators(this);
     }
 };
+
+function drawIndicators(scene) {
+    loosetrolleys.children.each((t) => {
+        var ti = t.indicator;
+        var view = scene.cameras.main.worldView;
+        if (view.contains(t.x, t.y)) {
+            ti.setVisible(false);
+            ti.body.x = t.body.x;
+            ti.body.y = t.body.y;
+        } else {
+            ti.setVisible(true);
+            if (ti.x < trolleys.x) {
+                ti.x = view.x + 10;
+                ti.y = t.y;
+            }
+
+            if (ti.x > trolleys.x) {
+                ti.x = view.x + view.width - 10;
+                ti.y = t.y;
+            }
+        }
+    });
+}
+
+function bounded(n, min, max) {
+    return Math.max(min, (Math.min(max, n)));
+}
 
 function collectTrolley (player, trolley) {
     heldTrolleysCount++;
@@ -308,9 +337,8 @@ function scoreTrolley (trolleyHouse, trolley)
 
         trolleys.setX(trolleys.x - Math.sin(leadRotation - trolleyAngleDelta) * 20);
         trolleys.setY(trolleys.y + Math.cos(leadRotation - trolleyAngleDelta) * 20);
-
-        //coin sprite
-        coin = this.physics.add.sprite(trolleyHouseX, trolleyHouseY, 'coin');
+         //coin sprite
+        var coin = this.physics.add.sprite(trolleyHouseX, trolleyHouseY, 'coin');
         coin.anims.play('spin', true);
 
         this.model = this.sys.game.globals.model;
@@ -339,22 +367,6 @@ function scoreTrolley (trolleyHouse, trolley)
             x: coin.x + (Phaser.Math.RND.sign()*Phaser.Math.RND.between(30, 50)),
             duration: 1000
         });
-
-        tempScore++;
-
-        console.log(tempScore);
-
-        totalScore = tempScore * (tempScore * scoreMultiplier);
-
-        console.log(totalScore);
-
-        this.time.addEvent({delay: 1500, callback: resetMultiplier, callbackScope: this, loop: true});
-
-        function resetMultiplier ()
-        {
-            tempScore = 0;
-        }
-
     }
 
     // reset the front and side trolley colliders

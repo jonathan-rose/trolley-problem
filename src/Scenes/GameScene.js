@@ -11,11 +11,20 @@ var trolleys;
 var trolleyHouse;
 var trolleyHouseX;
 var trolleyHouseY;
+var obstacles;
+
+var boundaries;
+var upBoundary;
+var downBoundary;
+var leftBoundary;
+var rightBoundary;
 
 var frontTrolleyCollider;
 var sideTrolleyCollider;
 var loosetrolleys;
 var heldTrolleys;
+var trolleysVelocityX = 0;
+var trolleysVelocityY = 0;
 
 var timeText;
 var startingTime = 20;
@@ -33,7 +42,7 @@ var startingLooseCount = 20;
 
 var loosetrolleys;
 var heldTrolleys;
-var redCar;
+
 var coin;
 
 export default class GameScene extends Phaser.Scene {
@@ -53,7 +62,6 @@ export default class GameScene extends Phaser.Scene {
         var worldScaleFactor = 2;
         var gameWorld = this.physics.world;
         gameWorld.setBounds(0, 0, gameWidth * worldScaleFactor, gameWidth * worldScaleFactor);
-
 
         var background = this.add.image(0, 0, 'carPark');
         background.setOrigin(0, 0);
@@ -76,11 +84,38 @@ export default class GameScene extends Phaser.Scene {
             loosetrolleys.add(t);
         }
 
-        redCar = this.physics.add.sprite(300, 150, 'redCar');
-        redCar = this.physics.add.sprite(400, 150, 'orangeCar');
-        redCar = this.physics.add.sprite(200, 150, 'blueCar');
-        redCar = this.physics.add.sprite(500, 150, 'greenCar');
-        redCar = this.physics.add.sprite(600, 150, 'blackCar');
+        upBoundary = this.add.rectangle(0, -100, gameWorld.bounds.width, 100);
+        downBoundary = this.add.rectangle(0, gameWorld.bounds.height, gameWorld.bounds.width, 100);
+        leftBoundary = this.add.rectangle(-100, 0, 100, gameWorld.bounds.height);
+        rightBoundary = this.add.rectangle(gameWorld.bounds.width, 0, 100, gameWorld.bounds.height);
+
+        upBoundary.setOrigin(0, 0);
+        downBoundary.setOrigin(0, 0);
+        leftBoundary.setOrigin(0, 0);
+        rightBoundary.setOrigin(0, 0);
+
+        boundaries = this.physics.add.group();
+        boundaries.add(upBoundary);
+        boundaries.add(downBoundary);
+        boundaries.add(leftBoundary);
+        boundaries.add(rightBoundary);
+
+        this.physics.add.collider(heldTrolleys, boundaries, hitBoundary, null, this);
+
+        var redCar = this.physics.add.sprite(300, 150, 'redCar');
+        var orangeCar = this.physics.add.sprite(400, 150, 'orangeCar');
+        var blueCar = this.physics.add.sprite(200, 150, 'blueCar');
+        var greenCar = this.physics.add.sprite(500, 150, 'greenCar');
+        var blackCar = this.physics.add.sprite(600, 150, 'blackCar');
+
+        obstacles = this.physics.add.group();
+        obstacles.add(redCar);
+        obstacles.add(orangeCar);
+        obstacles.add(blueCar);
+        obstacles.add(greenCar);
+        obstacles.add(blackCar);
+
+        this.physics.add.collider(heldTrolleys, obstacles, hitObstacle, null, this);
 
         // Position of trolley house
         // 64 is hard coded value of half the width of trolleyHouse sprite to save time
@@ -99,7 +134,6 @@ export default class GameScene extends Phaser.Scene {
             repeat: -1
         });
         trolleys.add(player);
-
         this.anims.create({
             key: 'spin',
             frames: this.anims.generateFrameNumbers('coin', { start: 0, end: 5 }),
@@ -125,7 +159,7 @@ export default class GameScene extends Phaser.Scene {
             this.model.bgMusicPlaying = true;
             this.sys.game.globals.bgMusic = this.bgMusic;
         }
-        
+
         // Display remaining time
         timeText = this.add.text(
             config.width * 0.5,
@@ -213,6 +247,12 @@ export default class GameScene extends Phaser.Scene {
         trolleys.setX(trolleys.x + Math.sin(leadRotation + trolleyAngleDelta) * speed);
         trolleys.setY(trolleys.y - Math.cos(leadRotation + trolleyAngleDelta) * speed);
 
+        trolleys.setX(trolleys.x + trolleysVelocityX);
+        trolleys.setY(trolleys.y + trolleysVelocityY);
+
+        trolleysVelocityX *= 0.95;
+        trolleysVelocityY *= 0.95;
+
         // slow down moving loose trolleys
         loosetrolleys.children.each((t) => {
             t.body.setVelocityX(0.98 * t.body.velocity.x);
@@ -256,14 +296,13 @@ function collectTrolley (player, trolley) {
 
 function scoreTrolley (trolleyHouse, trolley)
 {
-    if (trolleys.length > 2) 
+    if (trolleys.length > 2)
     {
         trolley.destroy();
         heldTrolleysCount--;
 
         trolleys.setX(trolleys.x - Math.sin(leadRotation - trolleyAngleDelta) * 20);
         trolleys.setY(trolleys.y + Math.cos(leadRotation - trolleyAngleDelta) * 20);
-
          //coin sprite
         coin = this.physics.add.sprite(trolleyHouseX, trolleyHouseY, 'coin');
         coin.anims.play('spin', true);
@@ -302,19 +341,6 @@ function scoreTrolley (trolleyHouse, trolley)
     sideTrolleyCollider.destroy();
     sideTrolleyCollider = this.physics.add.collider(heldTrolleys, loosetrolleys, knockTrolley, null, this);
 
-   
-    
-
-    // this.tweens.add({
-    //     targets: coin,
-    //     x: trolleyHouseX+200,
-    //     y: trolleyHouseY+200,
-    //     duration: 1000,
-    //     ease: 'Power2'
-    //     //repeat: 3,
-    //     //delay: 1000
-    // });
-    
 }
 
 /**
@@ -339,7 +365,39 @@ function knockTrolley(heldTrolley, looseTrolley) {
     }
 }
 
-// function coinAnimation(trolleyHouse)
-// {
+function hitObstacle(heldTrolley, obstacle)
+{
+    var heldPos = heldTrolley.body.position.clone();
+    var obstaclePos = obstacle.body.position.clone();
 
-// }
+    var diff = heldPos.subtract(obstaclePos);
+
+    var unit = diff.normalize();
+
+    trolleysVelocityX += unit.x * (speed * 2);
+    trolleysVelocityY += unit.y * (speed * 2);
+
+}
+
+function hitBoundary(heldTrolley, boundaryBlock)
+{
+    if (boundaryBlock == upBoundary)
+    {
+        trolleysVelocityY += (speed * 2);
+    }
+
+    if (boundaryBlock == downBoundary)
+    {
+        trolleysVelocityY -= (speed * 2);
+    }
+
+    if (boundaryBlock == leftBoundary)
+    {
+        trolleysVelocityX += (speed * 2);
+    }
+
+    if (boundaryBlock == rightBoundary)
+    {
+        trolleysVelocityX -= (speed * 2);
+    }
+}

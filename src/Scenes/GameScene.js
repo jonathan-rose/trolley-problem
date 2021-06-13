@@ -1,4 +1,5 @@
 import 'phaser';
+import { Clock } from 'phaser/src/time';
 import Button from '../Objects/Button';
 
 var maxTrolleyAngleDelta = Phaser.Math.DegToRad(10);
@@ -7,6 +8,8 @@ var cursors;
 
 var player;
 var trolleys;
+var trolleyHouse;
+
 var frontTrolleyCollider;
 var sideTrolleyCollider;
 var loosetrolleys;
@@ -26,6 +29,8 @@ var rotationDelta = 2;
 var trolleyAngleDelta = 0;
 var startingLooseCount = 20;
 
+var loosetrolleys;
+var heldTrolleys;
 var redCar;
 
 export default class GameScene extends Phaser.Scene {
@@ -54,7 +59,7 @@ export default class GameScene extends Phaser.Scene {
 
         heldTrolleys = this.physics.add.group();
 
-        trolleys = this.add.container(300, 250);
+        trolleys = this.add.container(800, 400);
         for (var i = 0; i < 1; i++) {
             var t = this.add.sprite(0, i * 10, 'trolley');
             trolleys.add(t);
@@ -75,6 +80,14 @@ export default class GameScene extends Phaser.Scene {
         redCar = this.physics.add.sprite(200, 150, 'blueCar');
         redCar = this.physics.add.sprite(500, 150, 'greenCar');
         redCar = this.physics.add.sprite(600, 150, 'blackCar');
+
+        // Position of trolley house
+        // 64 is hard coded value of half the width of trolleyHouse sprite to save time
+        var trolleyHouseX = (gameWorld.bounds.width / 2) - 64
+        trolleyHouse = this.physics.add.sprite(trolleyHouseX, 100, 'House');
+
+        // Add collider between firstmost trolley and trollyHouse
+        this.physics.add.overlap(heldTrolleys, trolleyHouse, scoreTrolley, null, this);
 
         player = this.physics.add.sprite(0, 0, 'player');
         this.anims.create({
@@ -103,7 +116,7 @@ export default class GameScene extends Phaser.Scene {
             this.model.bgMusicPlaying = true;
             this.sys.game.globals.bgMusic = this.bgMusic;
         }
-
+        
         // Display remaining time
         timeText = this.add.text(
             config.width * 0.5,
@@ -135,7 +148,9 @@ export default class GameScene extends Phaser.Scene {
         });
     }
 
-    update () {
+    update ()
+    {
+        var config = this.game.config;
 
         // if up is held, increment speed to max
         // if down is held decrement speed to min
@@ -224,6 +239,25 @@ function collectTrolley (player, trolley) {
 
     // play sound effect
     this.sound.play(Phaser.Math.RND.pick(['crash-1', 'crash-2', 'crash-3']), { volume: 0.5 });
+}
+
+function scoreTrolley (trolleyHouse, trolley)
+{
+    if (trolleys.length > 2) 
+    {
+        trolley.destroy();
+        heldTrolleysCount--;
+
+        trolleys.setX(trolleys.x - Math.sin(leadRotation - trolleyAngleDelta) * 20);
+        trolleys.setY(trolleys.y + Math.cos(leadRotation - trolleyAngleDelta) * 20);
+    }
+
+    // reset the front and side trolley colliders
+    frontTrolleyCollider.destroy();
+    frontTrolleyCollider = this.physics.add.overlap(trolleys.first, loosetrolleys, collectTrolley, null, this);
+    sideTrolleyCollider.destroy();
+    sideTrolleyCollider = this.physics.add.collider(heldTrolleys, loosetrolleys, knockTrolley, null, this);
+
 }
 
 /**

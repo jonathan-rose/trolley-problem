@@ -41,10 +41,10 @@ var trolleyAngleDelta = 0;
 var startingLooseCount = 50;
 
 var coin;
-var tempScore = 0;
+var collectedTrolleys = 0;
 var totalScore = 0;
 var scoreMultiplier = 1.5;
-var scoreTimer;
+var scoreText;
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -52,6 +52,8 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create () {
+        totalScore = 0;
+
         remainingTime = startingTime;
         var config = this.game.config;
 
@@ -166,10 +168,27 @@ export default class GameScene extends Phaser.Scene {
             this.sys.game.globals.bgMusic = this.bgMusic;
         }
 
+        var scoreCoin = this.physics.add.sprite(config.width * 0.035, config.height * 0.08, 'coin');
+        scoreCoin.anims.play('spin', true);
+        scoreCoin.setScrollFactor(0);
+        scoreCoin.setScale(2);
+
+        // Display scoreboard
+        scoreText = this.add.text(
+            config.width * 0.07,
+            config.height * 0.05,
+            totalScore,
+            {align: 'center',
+             fontSize: '48px',
+             fill: '#FFF',
+             backgroundColor: 'rgba(0,0,0,0.5)'}
+        );
+        scoreText.setScrollFactor(0);
+
         // Display remaining time
         timeText = this.add.text(
-            config.width * 0.5,
-            config.height * 0.11,
+            config.width * 0.75,
+            config.height * 0.05,
             remainingTime,
             {align: 'center',
              fontSize: '48px',
@@ -362,21 +381,22 @@ function scoreTrolley (trolleyHouse, trolley)
             duration: 1000
         });
 
-        tempScore++;
+        collectedTrolleys++;
+
+        var tempScore = collectedTrolleys + (collectedTrolleys * scoreMultiplier);
 
         console.log(tempScore);
-
-        totalScore = tempScore * (tempScore * scoreMultiplier);
-
-        console.log(totalScore);
 
         this.time.addEvent({delay: 1500, callback: resetMultiplier, callbackScope: this, loop: true});
 
         function resetMultiplier ()
         {
-            tempScore = 0;
+            collectedTrolleys = 0;
         }
 
+        totalScore = totalScore + tempScore;
+
+        scoreText.setText(totalScore);
     }
 
     // reset the front and side trolley colliders

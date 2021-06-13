@@ -23,7 +23,7 @@ var loosetrolleys;
 var heldTrolleys;
 var inHouse = false;
 
-var nextTrolley;
+var scoreDelayTimer = 0;
 
 var redCar;
 
@@ -55,7 +55,7 @@ export default class GameScene extends Phaser.Scene {
 
         heldTrolleys = this.physics.add.group();
 
-        trolleys = this.add.container(300, 250);
+        trolleys = this.add.container(800, 400);
         for (var i = 0; i < 1; i++) {
             var t = this.add.sprite(0, i * 10, 'trolley');
             trolleys.add(t);
@@ -186,53 +186,18 @@ function collectTrolley (player, trolley)
     this.sound.play(Phaser.Math.RND.pick(['crash-1', 'crash-2', 'crash-3']), { volume: 0.5 });
 }
 
-function scoreTrolley ()
+function scoreTrolley (trolleyHouse, trolley)
 {
-    // console.log(trolleys.length);
+    if (trolleys.length > 2) 
+    {
+    trolley.destroy();
+    heldTrolleysCount--;
 
-    // -1 on trolley.length to account for player entity
-    for (var i = (trolleys.length - 1); i > 1; i--) {
-        console.log(i);
-        trolleys.remove(trolleys.first);
-        heldTrolleysCount--;
+    trolleys.setX(trolleys.x - Math.sin(leadRotation - trolleyAngleDelta) * 20);
+    trolleys.setY(trolleys.y + Math.cos(leadRotation - trolleyAngleDelta) * 20);
     }
 
-    // if(((frame_count % 600) == 0) && trolleys.children.length > 0){
-    //     trolleys.remove(trolleys.first);
-    //     heldTrolleysCount--;
-    // }
-
-    // // var timer = this.add.TimerEvent;
-    // if (heldTrolleysCount > 1) {
-    //     this.time.delayedCall(1000, trolleys.remove(trolleys.first));
-    // heldTrolleysCount--;
-    // }
-
-    // if (heldTrolleysCount > 1) {
-    //     trolleys.remove(trolleys.first);
-    // }
-    
-
-    // timer = this.time.addEvent({ delay: 500, timeScale: 1});
-
-    // var timeNow = game.time;
-
-    // if (heldTrolleysCount > 0 && nextTrolley == (timeNow + 500)) {
-    //     trolleys.remove(trolleys.first);
-    // }
-    // else
-    // {
-    //     nextTrolley = game.time; 
-    // };
-
-        // heldTrolleysCount--;
-        // trolleys.remove(player);
-        // heldTrolleys.remove(trolley);
-        // heldTrolleys.remove(heldTrolleys.children[0], true);
-        // heldTrolleys.remove(t);
-        // heldTrolleys.destroy();
-    
     console.log(heldTrolleysCount);
-    // heldTrolleys.remove(trolley);
+
     
 }

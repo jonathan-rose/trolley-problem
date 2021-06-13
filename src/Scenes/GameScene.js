@@ -21,14 +21,6 @@ var startingLooseCount = 20;
 
 var loosetrolleys;
 var heldTrolleys;
-var inHouse = false;
-
-var scoreDelayTimer = 0;
-
-var redCar;
-
-var frame_count = 0;
-
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -75,6 +67,7 @@ export default class GameScene extends Phaser.Scene {
         redCar = this.physics.add.sprite(500, 150, 'greenCar');
         redCar = this.physics.add.sprite(600, 150, 'blackCar');
 
+        // Position of trolley house
         // 64 is hard coded value of half the width of trolleyHouse sprite to save time
         var trolleyHouseX = (gameWorld.bounds.width / 2) - 64
         trolleyHouse = this.physics.add.sprite(trolleyHouseX, 100, 'House');

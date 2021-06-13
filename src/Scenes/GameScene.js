@@ -38,10 +38,7 @@ var maxSpeed = 3;
 var leadRotation = 0;
 var rotationDelta = 2;
 var trolleyAngleDelta = 0;
-var startingLooseCount = 20;
-
-var loosetrolleys;
-var heldTrolleys;
+var startingLooseCount = 50;
 
 var coin;
 var tempScore = 0;
@@ -82,16 +79,20 @@ export default class GameScene extends Phaser.Scene {
 
         loosetrolleys = this.physics.add.group();
         for (var i = 0; i < startingLooseCount; i++) {
-            t = this.physics.add.sprite(Phaser.Math.RND.between(0, gameWidth), Phaser.Math.RND.between(0, gameHeight), 'trolley');
+            t = this.physics.add.sprite(
+                Phaser.Math.RND.between(0, gameWidth * worldScaleFactor),
+                Phaser.Math.RND.between(0, gameHeight * worldScaleFactor),
+                'trolley'
+            );
             t.setRotation(Phaser.Math.RND.rotation());
             t.setCollideWorldBounds(true);
             loosetrolleys.add(t);
         }
 
-        upBoundary = this.add.rectangle(0, -100, gameWorld.bounds.width, 100);
-        downBoundary = this.add.rectangle(0, gameWorld.bounds.height, gameWorld.bounds.width, 100);
-        leftBoundary = this.add.rectangle(-100, 0, 100, gameWorld.bounds.height);
-        rightBoundary = this.add.rectangle(gameWorld.bounds.width, 0, 100, gameWorld.bounds.height);
+        upBoundary = this.add.rectangle(0, -100, gameWidth * worldScaleFactor, 100);
+        downBoundary = this.add.rectangle(0, gameHeight * worldScaleFactor, gameWidth * worldScaleFactor, 100);
+        leftBoundary = this.add.rectangle(-100, 0, 100, gameHeight * worldScaleFactor);
+        rightBoundary = this.add.rectangle(gameWidth * worldScaleFactor, 0, 100, gameHeight * worldScaleFactor);
 
         upBoundary.setOrigin(0, 0);
         downBoundary.setOrigin(0, 0);
@@ -307,7 +308,8 @@ function scoreTrolley (trolleyHouse, trolley)
 
         trolleys.setX(trolleys.x - Math.sin(leadRotation - trolleyAngleDelta) * 20);
         trolleys.setY(trolleys.y + Math.cos(leadRotation - trolleyAngleDelta) * 20);
-         //coin sprite
+
+        //coin sprite
         coin = this.physics.add.sprite(trolleyHouseX, trolleyHouseY, 'coin');
         coin.anims.play('spin', true);
 
@@ -322,7 +324,7 @@ function scoreTrolley (trolleyHouse, trolley)
             y: coin.y - 50,
             yoyo: true,
             duration: 500,
-            ease: "Sine.easeOut", 
+            ease: "Sine.easeOut",
             callbackScope: this,
             onComplete: function(tween, c){
                 this.time.addEvent({
@@ -346,7 +348,7 @@ function scoreTrolley (trolleyHouse, trolley)
 
         console.log(totalScore);
 
-        this.time.addEvent({delay: 1500, callback: resetMultiplier, callbackScope: this, loop: true})
+        this.time.addEvent({delay: 1500, callback: resetMultiplier, callbackScope: this, loop: true});
 
         function resetMultiplier ()
         {

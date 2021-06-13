@@ -16,8 +16,6 @@ export default class TitleScene extends Phaser.Scene {
 	var config = this.game.config;
 
         this.add.image(config.width/2, config.height/2, 'menuBG');
-        this.add.image(config.width*0.3, config.height/2 - 100, 'Logo');
-
 
         // Draw conveyor belt
         this.add.rectangle(config.width*0.5 - 50, config.height*0.85, config.width + 100, 100, 0x394648);
@@ -43,13 +41,13 @@ export default class TitleScene extends Phaser.Scene {
         };
 
         // Game - Head to Rocket Select page
-        this.gameButton = new Button(this, config.width*0.75, config.height/2 - 200, 'Button', 'ButtonPressed', 'Play', 'Game');
+        this.gameButton = new Button(this, config.width*0.75, config.height/2 - 110, 'Button', 'ButtonPressed', 'Play', 'Intro');
 
         // Options
-        this.optionsButton = new Button(this, config.width*0.75, config.height/2 - 100, 'Button', 'ButtonPressed', 'Options', 'Options');
+        this.optionsButton = new Button(this, config.width*0.75, config.height/2 - 10, 'Button', 'ButtonPressed', 'Options', 'Options');
 
         // About
-        this.aboutButton = new Button(this, config.width*0.75, config.height/2, 'Button', 'ButtonPressed', 'About', 'About');
+        this.aboutButton = new Button(this, config.width*0.75, config.height/2 + 90, 'Button', 'ButtonPressed', 'About', 'About');
 
         this.model = this.sys.game.globals.model;
         if (this.model.musicOn === true && this.model.bgMusicPlaying === false) {

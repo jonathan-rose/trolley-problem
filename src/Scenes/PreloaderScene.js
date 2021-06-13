@@ -95,18 +95,22 @@ export default class PreloaderScene extends Phaser.Scene {
         this.load.image('blackCar', 'assets/img/carBlack.png');
         this.load.image('conveyorIndicator', 'assets/img/conveyorIndicator.png');
 
+        //Backgrounds
+        this.load.image('menuBG', 'assets/img/menuBackground.png');
+        this.load.image('optionsBG', 'assets/img/optionsBackground.png');
+        this.load.image('aboutBG', 'assets/img/aboutBackground.png');
+        this.load.image('introBG', 'assets/img/introBackground.png');
 
         // TEMP assets
         this.load.image('sky', 'assets/img/sky.png');
-        this.load.image('menuBG', 'assets/img/sky.png');
-        this.load.image('aboutBG', 'assets/img/sky.png');
         this.load.image('deathScene', 'assets/img/deathScene.png');
+
         this.load.image('Button', 'assets/img/button1.png');
         this.load.image('ButtonPressed', 'assets/img/button1selected.png');
         this.load.image('box', 'assets/img/box.png');
         this.load.image('checkedBox', 'assets/img/checked1.png');
-        this.load.image('Logo', 'assets/img/logoBigger.png');
-        this.load.image('Background', 'assets/img/background.png');
+        //this.load.image('Logo', 'assets/img/logoBigger.png');
+        //this.load.image('Background', 'assets/img/background.png');
         this.load.image('House', 'assets/img/trolleyHouse.png');
 
         // remove progress bar when complete

@@ -115,13 +115,8 @@ export default class GameScene extends Phaser.Scene {
             this.bgMusic.play();
             this.model.bgMusicPlaying = true;
             this.sys.game.globals.bgMusic = this.bgMusic;
-        }        
-    }
-
-    update ()
-    {
-        // console.log(trolleys.length);
-
+        }
+        
         // Display remaining time
         timeText = this.add.text(
             config.width * 0.5,
@@ -151,6 +146,11 @@ export default class GameScene extends Phaser.Scene {
                 timeText.setColor('#FF0000');
             }
         });
+    }
+
+    update ()
+    {
+        var config = this.game.config;
 
         // if up is held, increment speed to max
         // if down is held decrement speed to min
@@ -245,14 +245,19 @@ function scoreTrolley (trolleyHouse, trolley)
 {
     if (trolleys.length > 2) 
     {
-    trolley.destroy();
-    heldTrolleysCount--;
+        trolley.destroy();
+        heldTrolleysCount--;
 
-    trolleys.setX(trolleys.x - Math.sin(leadRotation - trolleyAngleDelta) * 20);
-    trolleys.setY(trolleys.y + Math.cos(leadRotation - trolleyAngleDelta) * 20);
+        trolleys.setX(trolleys.x - Math.sin(leadRotation - trolleyAngleDelta) * 20);
+        trolleys.setY(trolleys.y + Math.cos(leadRotation - trolleyAngleDelta) * 20);
     }
 
-    console.log(heldTrolleysCount);
+    // reset the front and side trolley colliders
+    frontTrolleyCollider.destroy();
+    frontTrolleyCollider = this.physics.add.overlap(trolleys.first, loosetrolleys, collectTrolley, null, this);
+    sideTrolleyCollider.destroy();
+    sideTrolleyCollider = this.physics.add.collider(heldTrolleys, loosetrolleys, knockTrolley, null, this);
+
 }
 
 /**

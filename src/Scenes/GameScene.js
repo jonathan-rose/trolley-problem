@@ -38,7 +38,7 @@ var maxSpeed = 3;
 var leadRotation = 0;
 var rotationDelta = 2;
 var trolleyAngleDelta = 0;
-var startingLooseCount = 50;
+var startingLooseCount = 70;
 
 var coin;
 var collectedTrolleys = 0;
@@ -110,11 +110,28 @@ export default class GameScene extends Phaser.Scene {
 
         this.physics.add.collider(heldTrolleys, boundaries, hitBoundary, null, this);
 
-        var redCar = this.physics.add.sprite(300, 150, 'redCar');
-        var orangeCar = this.physics.add.sprite(400, 150, 'orangeCar');
-        var blueCar = this.physics.add.sprite(200, 150, 'blueCar');
-        var greenCar = this.physics.add.sprite(500, 150, 'greenCar');
-        var blackCar = this.physics.add.sprite(600, 150, 'blackCar');
+        var redCar = this.physics.add.sprite(75, 80, 'redCar');
+        var orangeCar = this.physics.add.sprite(470, 205, 'orangeCar');
+        var blueCar = this.physics.add.sprite(1150, 425, 'blueCar');
+        var greenCar = this.physics.add.sprite(875, 420, 'greenCar');
+        var blackCar = this.physics.add.sprite(165, 430, 'blackCar');
+        var redCar1 = this.physics.add.sprite(435, 560, 'redCar');
+        var orangeCar1 = this.physics.add.sprite(335, 915, 'orangeCar');
+        var blueCar1 = this.physics.add.sprite(400, 675, 'blueCar');
+        var redCar2 = this.physics.add.sprite(1240, 480, 'redCar');
+        var blackCar1 = this.physics.add.sprite(1055, 915, 'blackCar');
+
+        var bin1 = this.physics.add.sprite(1550, 520, 'bin');
+        var bin2 = this.physics.add.sprite(1550, 605, 'bin');
+        var trafCone1 = this.physics.add.sprite(1450, 705, 'trafCone');
+        var trafCone3 = this.physics.add.sprite(1450, 840, 'trafCone');
+        var trafCone4 = this.physics.add.sprite(1450, 975, 'trafCone');
+        var trafCone5 = this.physics.add.sprite(1550, 975, 'trafCone');
+
+        orangeCar.rotation += Phaser.Math.DegToRad(90);
+        greenCar.rotation += Phaser.Math.DegToRad(180);
+        blueCar1.rotation += Phaser.Math.DegToRad(90);
+        // greenCar.rotation += 60;
 
         obstacles = this.physics.add.group();
         obstacles.add(redCar);
@@ -122,6 +139,17 @@ export default class GameScene extends Phaser.Scene {
         obstacles.add(blueCar);
         obstacles.add(greenCar);
         obstacles.add(blackCar);
+        obstacles.add(redCar1);
+        obstacles.add(orangeCar1);
+        obstacles.add(blueCar1);
+        obstacles.add(redCar2);
+        obstacles.add(blackCar1);
+        obstacles.add(bin1);
+        obstacles.add(bin2);
+        obstacles.add(trafCone1);
+        obstacles.add(trafCone3);
+        obstacles.add(trafCone4);
+        obstacles.add(trafCone5);
 
         this.physics.add.collider(heldTrolleys, obstacles, hitObstacle, null, this);
 
@@ -167,7 +195,6 @@ export default class GameScene extends Phaser.Scene {
             this.model.bgMusicPlaying = true;
             this.sys.game.globals.bgMusic = this.bgMusic;
         }
-
         var scoreCoin = this.physics.add.sprite(config.width * 0.035, config.height * 0.08, 'coin');
         scoreCoin.anims.play('spin', true);
         scoreCoin.setScrollFactor(0);
@@ -386,6 +413,8 @@ function scoreTrolley (trolleyHouse, trolley)
         var tempScore = collectedTrolleys + (collectedTrolleys * scoreMultiplier);
 
         console.log(tempScore);
+
+
 
         this.time.addEvent({delay: 1500, callback: resetMultiplier, callbackScope: this, loop: true});
 

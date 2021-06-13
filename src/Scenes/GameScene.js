@@ -119,8 +119,8 @@ export default class GameScene extends Phaser.Scene {
 
         // Position of trolley house
         // 64 is hard coded value of half the width of trolleyHouse sprite to save time
-        trolleyHouseX = (gameWorld.bounds.width / 2) - 64;
-        trolleyHouseY = 100;
+        trolleyHouseX = (gameWorld.bounds.width - 70);
+        trolleyHouseY = 85;
         trolleyHouse = this.physics.add.sprite(trolleyHouseX, trolleyHouseY, 'House');
 
         // Add collider between firstmost trolley and trollyHouse

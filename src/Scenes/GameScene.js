@@ -84,22 +84,16 @@ export default class GameScene extends Phaser.Scene {
             loosetrolleys.add(t);
         }
 
-        var redCar = this.physics.add.sprite(300, 150, 'redCar');
-        var orangeCar = this.physics.add.sprite(400, 150, 'orangeCar');
-        var blueCar = this.physics.add.sprite(200, 150, 'blueCar');
-        var greenCar = this.physics.add.sprite(500, 150, 'greenCar');
-        var blackCar = this.physics.add.sprite(600, 150, 'blackCar');
-
-        upBoundary = this.add.rectangle(0, -100, gameWidth * worldScaleFactor, 100);
-        downBoundary = this.add.rectangle(0, gameHeight * worldScaleFactor, gameWidth * worldScaleFactor, 100);
-        leftBoundary = this.add.rectangle(-100, 0, 100, gameHeight * worldScaleFactor);
-        rightBoundary = this.add.rectangle(gameWidth * worldScaleFactor, 0, 100, gameHeight * worldScaleFactor);
+        upBoundary = this.add.rectangle(0, -100, gameWorld.bounds.width, 100);
+        downBoundary = this.add.rectangle(0, gameWorld.bounds.height, gameWorld.bounds.width, 100);
+        leftBoundary = this.add.rectangle(-100, 0, 100, gameWorld.bounds.height);
+        rightBoundary = this.add.rectangle(gameWorld.bounds.width, 0, 100, gameWorld.bounds.height);
 
         upBoundary.setOrigin(0, 0);
         downBoundary.setOrigin(0, 0);
         leftBoundary.setOrigin(0, 0);
         rightBoundary.setOrigin(0, 0);
-        
+
         boundaries = this.physics.add.group();
         boundaries.add(upBoundary);
         boundaries.add(downBoundary);
@@ -107,6 +101,12 @@ export default class GameScene extends Phaser.Scene {
         boundaries.add(rightBoundary);
 
         this.physics.add.collider(heldTrolleys, boundaries, hitBoundary, null, this);
+
+        var redCar = this.physics.add.sprite(300, 150, 'redCar');
+        var orangeCar = this.physics.add.sprite(400, 150, 'orangeCar');
+        var blueCar = this.physics.add.sprite(200, 150, 'blueCar');
+        var greenCar = this.physics.add.sprite(500, 150, 'greenCar');
+        var blackCar = this.physics.add.sprite(600, 150, 'blackCar');
 
         obstacles = this.physics.add.group();
         obstacles.add(redCar);
@@ -116,10 +116,10 @@ export default class GameScene extends Phaser.Scene {
         obstacles.add(blackCar);
 
         this.physics.add.collider(heldTrolleys, obstacles, hitObstacle, null, this);
-        
+
         // Position of trolley house
         // 64 is hard coded value of half the width of trolleyHouse sprite to save time
-        var trolleyHouseX = (gameWorld.bounds.width / 2) - 64
+        var trolleyHouseX = (gameWorld.bounds.width / 2) - 64;
         trolleyHouse = this.physics.add.sprite(trolleyHouseX, 100, 'House');
 
         // Add collider between firstmost trolley and trollyHouse
@@ -152,7 +152,7 @@ export default class GameScene extends Phaser.Scene {
             this.model.bgMusicPlaying = true;
             this.sys.game.globals.bgMusic = this.bgMusic;
         }
-        
+
         // Display remaining time
         timeText = this.add.text(
             config.width * 0.5,
@@ -285,7 +285,7 @@ function collectTrolley (player, trolley) {
 
 function scoreTrolley (trolleyHouse, trolley)
 {
-    if (trolleys.length > 2) 
+    if (trolleys.length > 2)
     {
         trolley.destroy();
         heldTrolleysCount--;
@@ -340,22 +340,22 @@ function hitObstacle(heldTrolley, obstacle)
 
 function hitBoundary(heldTrolley, boundaryBlock)
 {
-    if (boundaryBlock = upBoundary)
+    if (boundaryBlock == upBoundary)
     {
         trolleysVelocityY += (speed * 2);
     }
 
-    if (boundaryBlock = downBoundary)
+    if (boundaryBlock == downBoundary)
     {
         trolleysVelocityY -= (speed * 2);
     }
-    
-    if (boundaryBlock = leftBoundary)
+
+    if (boundaryBlock == leftBoundary)
     {
         trolleysVelocityX += (speed * 2);
     }
 
-    if (boundaryBlock = rightBoundary)
+    if (boundaryBlock == rightBoundary)
     {
         trolleysVelocityX -= (speed * 2);
     }

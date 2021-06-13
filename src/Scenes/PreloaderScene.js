@@ -122,6 +122,13 @@ export default class PreloaderScene extends Phaser.Scene {
             loadingText.destroy();
             percentText.destroy();
             assetText.destroy();
+            this.game.registry.set('titleMusic', this.sound.add('titleMusic', { volume: 0.5, loop: true }));
+            this.game.registry.set('gameMusic', this.sound.add('gameMusic', { volume: 0.5, loop: true }));
+            this.game.registry.set('tills', this.sound.add('tills', { volume: 0.5 }));
+            this.game.registry.set('crash-1', this.sound.add('crash-1', { volume: 0.5 }));
+            this.game.registry.set('crash-2', this.sound.add('crash-2', { volume: 0.5 }));
+            this.game.registry.set('crash-3', this.sound.add('crash-3', { volume: 0.5 }));
+            this.game.registry.set('coinSound', this.sound.add('coinSound', { volume: 0.5 }));
             this.ready();
         }.bind(this));
 

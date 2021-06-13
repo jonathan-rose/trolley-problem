@@ -81,10 +81,13 @@ export default class PreloaderScene extends Phaser.Scene {
         this.load.audio('crash-1', ['assets/sound/fx/crash-1.wav']);
         this.load.audio('crash-2', ['assets/sound/fx/crash-2.wav']);
         this.load.audio('crash-3', ['assets/sound/fx/crash-3.wav']);
+        this.load.audio('coinSound', ['assets/sound/fx/coin.wav']);
 
 
         this.load.image('trolley', 'assets/img/trolley.png');
         this.load.spritesheet('player', 'assets/img/playerSprite.png', { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet('coin', 'assets/img/coin.png', { frameWidth: 16, frameHeight: 16 });
+        this.load.image('carPark', 'assets/img/carPark.png');
         this.load.image('redCar', 'assets/img/carRed.png');
         this.load.image('greenCar', 'assets/img/carGreen.png');
         this.load.image('blueCar', 'assets/img/carBlue.png');
@@ -95,7 +98,6 @@ export default class PreloaderScene extends Phaser.Scene {
 
         // TEMP assets
         this.load.image('sky', 'assets/img/sky.png');
-        this.load.spritesheet('dude', 'assets/img/dude.png', { frameWidth: 32, frameHeight: 48 });
         this.load.image('menuBG', 'assets/img/sky.png');
         this.load.image('aboutBG', 'assets/img/sky.png');
         this.load.image('deathScene', 'assets/img/deathScene.png');

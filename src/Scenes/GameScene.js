@@ -9,11 +9,21 @@ var cursors;
 var player;
 var trolleys;
 var trolleyHouse;
+var obstacles;
+
+var boundaries;
+var upBoundary;
+var downBoundary;
+var leftBoundary;
+var rightBoundary;
 
 var frontTrolleyCollider;
 var sideTrolleyCollider;
 var loosetrolleys;
 var heldTrolleys;
+
+var trolleysVelocityX = 0;
+var trolleysVelocityY = 0;
 
 var timeText;
 var startingTime = 20;
@@ -31,7 +41,6 @@ var startingLooseCount = 20;
 
 var loosetrolleys;
 var heldTrolleys;
-var redCar;
 
 export default class GameScene extends Phaser.Scene {
     constructor () {
@@ -75,12 +84,39 @@ export default class GameScene extends Phaser.Scene {
             loosetrolleys.add(t);
         }
 
-        redCar = this.physics.add.sprite(300, 150, 'redCar');
-        redCar = this.physics.add.sprite(400, 150, 'orangeCar');
-        redCar = this.physics.add.sprite(200, 150, 'blueCar');
-        redCar = this.physics.add.sprite(500, 150, 'greenCar');
-        redCar = this.physics.add.sprite(600, 150, 'blackCar');
+        var redCar = this.physics.add.sprite(300, 150, 'redCar');
+        var orangeCar = this.physics.add.sprite(400, 150, 'orangeCar');
+        var blueCar = this.physics.add.sprite(200, 150, 'blueCar');
+        var greenCar = this.physics.add.sprite(500, 150, 'greenCar');
+        var blackCar = this.physics.add.sprite(600, 150, 'blackCar');
 
+        upBoundary = this.add.rectangle(0, -100, gameWidth * worldScaleFactor, 100);
+        downBoundary = this.add.rectangle(0, gameHeight * worldScaleFactor, gameWidth * worldScaleFactor, 100);
+        leftBoundary = this.add.rectangle(-100, 0, 100, gameHeight * worldScaleFactor);
+        rightBoundary = this.add.rectangle(gameWidth * worldScaleFactor, 0, 100, gameHeight * worldScaleFactor);
+
+        upBoundary.setOrigin(0, 0);
+        downBoundary.setOrigin(0, 0);
+        leftBoundary.setOrigin(0, 0);
+        rightBoundary.setOrigin(0, 0);
+        
+        boundaries = this.physics.add.group();
+        boundaries.add(upBoundary);
+        boundaries.add(downBoundary);
+        boundaries.add(leftBoundary);
+        boundaries.add(rightBoundary);
+
+        this.physics.add.collider(heldTrolleys, boundaries, hitBoundary, null, this);
+
+        obstacles = this.physics.add.group();
+        obstacles.add(redCar);
+        obstacles.add(orangeCar);
+        obstacles.add(blueCar);
+        obstacles.add(greenCar);
+        obstacles.add(blackCar);
+
+        this.physics.add.collider(heldTrolleys, obstacles, hitObstacle, null, this);
+        
         // Position of trolley house
         // 64 is hard coded value of half the width of trolleyHouse sprite to save time
         var trolleyHouseX = (gameWorld.bounds.width / 2) - 64
@@ -204,6 +240,12 @@ export default class GameScene extends Phaser.Scene {
         trolleys.setX(trolleys.x + Math.sin(leadRotation + trolleyAngleDelta) * speed);
         trolleys.setY(trolleys.y - Math.cos(leadRotation + trolleyAngleDelta) * speed);
 
+        trolleys.setX(trolleys.x + trolleysVelocityX);
+        trolleys.setY(trolleys.y + trolleysVelocityY);
+
+        trolleysVelocityX *= 0.95;
+        trolleysVelocityY *= 0.95;
+
         // slow down moving loose trolleys
         loosetrolleys.children.each((t) => {
             t.body.setVelocityX(0.98 * t.body.velocity.x);
@@ -279,5 +321,42 @@ function knockTrolley(heldTrolley, looseTrolley) {
         looseTrolley.body.setVelocityX(unit.x * 200);
         looseTrolley.body.setVelocityY(unit.y * 200);
         looseTrolley.body.setAngularVelocity(Phaser.Math.RND.sign() * Phaser.Math.RND.between(75, 125));
+    }
+}
+
+function hitObstacle(heldTrolley, obstacle)
+{
+    var heldPos = heldTrolley.body.position.clone();
+    var obstaclePos = obstacle.body.position.clone();
+
+    var diff = heldPos.subtract(obstaclePos);
+
+    var unit = diff.normalize();
+
+    trolleysVelocityX += unit.x * (speed * 2);
+    trolleysVelocityY += unit.y * (speed * 2);
+
+}
+
+function hitBoundary(heldTrolley, boundaryBlock)
+{
+    if (boundaryBlock = upBoundary)
+    {
+        trolleysVelocityY += (speed * 2);
+    }
+
+    if (boundaryBlock = downBoundary)
+    {
+        trolleysVelocityY -= (speed * 2);
+    }
+    
+    if (boundaryBlock = leftBoundary)
+    {
+        trolleysVelocityX += (speed * 2);
+    }
+
+    if (boundaryBlock = rightBoundary)
+    {
+        trolleysVelocityX -= (speed * 2);
     }
 }

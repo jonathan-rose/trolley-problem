@@ -27,7 +27,7 @@ var trolleysVelocityX = 0;
 var trolleysVelocityY = 0;
 
 var timeText;
-var startingTime = 20;
+var startingTime = 60;
 var remainingTime = startingTime;
 
 var heldTrolleysCount = 1;
@@ -52,6 +52,7 @@ export default class GameScene extends Phaser.Scene {
     }
 
     create () {
+        remainingTime = startingTime;
         var config = this.game.config;
 
         // Create references to the width and height of the viewport in browser
@@ -200,6 +201,11 @@ export default class GameScene extends Phaser.Scene {
     {
         var config = this.game.config;
 
+        if (remainingTime == 0) {
+            this.model.score = totalScore;
+            this.endScene();
+        }
+
         // if up is held, increment speed to max
         // if down is held decrement speed to min
         // else decay speed to min slowly.
@@ -267,6 +273,22 @@ export default class GameScene extends Phaser.Scene {
 
         this.cameras.main.centerOn(trolleys.x + player.x, trolleys.y + player.y);
     }
+
+    endScene() {
+        var config = this.game.config;
+        this.model = this.sys.game.globals.model;
+
+        this.physics.pause();
+
+        trolleys.each((t) => {
+            t.setTint(0xff0000);
+        });
+
+        var timer = this.time.delayedCall(1000, function(){
+            this.scene.start('End');
+        }, [], this);
+}
+
 };
 
 function collectTrolley (player, trolley) {
